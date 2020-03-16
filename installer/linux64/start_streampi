@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+cd ~/StreamPi/
+#jdk/bin/java -Dcom.sun.javafx.isEmbedded=true -Dcom.sun.javafx.touch=true -Dcom.sun.javafx.virtualKeyboard=javafx StreamPiClient.Main
+jdk/bin/java StreamPiClient.Main
