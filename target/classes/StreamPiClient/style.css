@@ -10,9 +10,9 @@
     -fx-effect: dropshadow(three-pass-box, red, 15, 0, 0, 0)
 }
 
-.text{
+/*.text{
     -fx-font-smoothing-type: gray;
-}
+}*/
 
 .action_box {
     /*-fx-effect: dropshadow(three-pass-box, red, 5, 0, 0, 0);*/
@@ -24,4 +24,31 @@
 
 .dialog_style {
     -fx-background-color : #212121;
+}
+
+TextField {
+    -fx-background-color:transparent;
+    -fx-background:none;
+    -fx-text-fill:white;
+
+    -fx-border-color:green;
+    -fx-border-width: 0 0 1 0;
+}
+
+.pane {
+    -fx-background-color:black;
+}
+
+Label {
+    -fx-text-fill:white;
+}
+
+Button {
+    -fx-background:none;
+    -fx-background-color:transparent;
+    -fx-text-fill:white;
+}
+
+.h3{
+    -fx-font-size:25;
 }

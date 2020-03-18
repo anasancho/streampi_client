@@ -6,8 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="streampi_client" />
+        <module name="StreamPiClient" />
         <module name="streampi_client_maven" />
+        <module name="streampi_client" />
       </profile>
     </annotationProcessing>
   </component>
