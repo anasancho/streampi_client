@@ -10,16 +10,15 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) {
         dash d = new dash();
-        io i = new io();
-        String[] conf = i.readFileArranged("config","::");
-        Scene s = new Scene(d, Integer.parseInt(conf[0]), Integer.parseInt(conf[1]));
+        Scene s = new Scene(d);
         primaryStage.setScene(s);
         primaryStage.show();
         d.initialize();
     }
 
+    static final boolean isMobile = false;
 
     public static void main(String[] args) {
         System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true" );

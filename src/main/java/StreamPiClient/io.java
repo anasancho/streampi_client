@@ -5,27 +5,37 @@ import javafx.scene.image.Image;
 import java.io.*;
 
 public class io {
+    String location;
     public io() throws Exception
     {
+        if(Main.isMobile)
+        {
+            location = "/storage/emulated/0/StreamPiClient/";
+        }
+        else
+        {
+            location = "";
+        }
 
-        File actionsFolder = new File("actions/");
+        File actionsFolder = new File(location+"actions/");
         if(!actionsFolder.exists())
         {
-            actionsFolder.mkdirs();
-            File detailsFolder = new File("actions/details/");
-            detailsFolder.mkdir();
-            File iconsFolder = new File("actions/icons/");
-            iconsFolder.mkdir();
+            if(!actionsFolder.mkdirs()) throw new Exception("Unable to create Actions Folder");
+            File detailsFolder = new File(location+"actions/details/");
+            if(!detailsFolder.mkdirs()) throw new Exception("Unable to create Details Folder");
+            File iconsFolder = new File(location+"actions/icons/");
+            if(!iconsFolder.mkdirs()) throw new Exception("Unable to create Icons Folder");
 
-            new File("config").createNewFile();
-            writeToFile("800::480::192.168.0.108::23::test1::1::1::105::10::","config");
+
+            if(!new File(location+"config").createNewFile()) throw new Exception("Unable to Create Config");
+            writeToFile("192.168.0.102::22::StreamPi::1::1::50::10::","config");
         }
     }
 
     public String readFileRaw(String fileName) throws Exception
     {
         String toBeReturned;
-        BufferedReader bf = new BufferedReader(new FileReader(fileName));
+        BufferedReader bf = new BufferedReader(new FileReader(location+fileName));
         toBeReturned = bf.readLine();
         bf.close();
         return toBeReturned;
@@ -33,17 +43,17 @@ public class io {
 
     public boolean deleteFile(String loc)
     {
-        return new File(loc).delete();
+        return new File(location+loc).delete();
     }
 
     public String[] listFiles(String loc)
     {
-        return new File(loc).list();
+        return new File(location+loc).list();
     }
 
     public Image returnImage(String loc)
     {
-        return new Image(new File(loc).toURI().toString());
+        return new Image(new File(location+loc).toURI().toString());
     }
 
     public String[] readFileArranged(String fileName, String s) throws Exception
@@ -53,7 +63,7 @@ public class io {
 
     public byte[] returnBytesFromFile(String loc) throws Exception
     {
-        FileInputStream fs = new FileInputStream(loc);
+        FileInputStream fs = new FileInputStream(location+loc);
         byte[] imageB = fs.readAllBytes();
         fs.close();
         return imageB;
@@ -61,14 +71,14 @@ public class io {
 
     public void writeToFile(String content, String fileName) throws Exception
     {
-        BufferedWriter bf = new BufferedWriter(new FileWriter(fileName));
+        BufferedWriter bf = new BufferedWriter(new FileWriter(location+fileName));
         bf.write(content);
         bf.close();
     }
 
     public void writeToFileRaw(byte[] toWrite, String fileName) throws Exception
     {
-        FileOutputStream fs = new FileOutputStream(fileName);
+        FileOutputStream fs = new FileOutputStream(location+fileName);
         fs.write(toWrite);
         fs.close();
     }

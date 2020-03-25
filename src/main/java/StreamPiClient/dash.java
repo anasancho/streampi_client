@@ -1,6 +1,9 @@
 package StreamPiClient;
 
 import animatefx.animation.*;
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXDialogLayout;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -9,15 +12,15 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.SwipeEvent;
-import javafx.scene.input.TouchEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 import java.io.*;
@@ -52,67 +55,74 @@ public class dash extends dashboardBase {
 
     public io io;
 
-    void readConfig() throws Exception {
+    void readConfig() throws Exception
+    {
         config = new HashMap<>();
-        String[] configArray = io.readFileArranged("config", "::");
-        config.put("width", configArray[0]);
-        config.put("height", configArray[1]);
-        config.put("server_ip", configArray[2]);
-        serverIP = configArray[2];
-        config.put("server_port", Integer.parseInt(configArray[3]));
+        String[] configArray = io.readFileArranged("config","::");
+        config.put("width",(int) getWidth());
+        config.put("height",(int) getHeight());
+        config.put("server_ip",configArray[0]);
+        serverIP = configArray[0];
+        config.put("server_port",Integer.parseInt(configArray[1]));
         serverPort = (int) config.get("server_port");
-        config.put("device_nick_name", configArray[4]);
-        config.put("animations_mode", configArray[5]);
-        config.put("debug_mode", configArray[6]);
-        config.put("each_action_size", Integer.parseInt(configArray[7]));
-        config.put("each_action_padding", Integer.parseInt(configArray[8]));
+        config.put("device_nick_name",configArray[2]);
+        config.put("animations_mode",configArray[3]);
+        config.put("debug_mode",configArray[4]);
+        config.put("each_action_size",Integer.parseInt(configArray[5]));
+        config.put("each_action_padding",Integer.parseInt(configArray[6]));
     }
 
 
     public void initialize() {
-        try {
+        try
+        {
             io = new io();
             readConfig();
-        } catch (Exception e) {
+            eachActionSize = (int) config.get("each_action_size");
+            eachActionPadding = (int) config.get("each_action_padding");
+            actionsVBox.setSpacing(eachActionPadding);
+            actionsVBox.setPadding(new Insets(3));
+
+            serverIPField.setText(serverIP);
+            serverPortField.setText(serverPort+"");
+            unableToConnectReasonLabel.setText("");
+
+            if (config.get("animations_mode").equals("0")) {
+                animationsToggleButton.setSelected(false);
+            } else {
+                animationsToggleButton.setSelected(true);
+            }
+
+            if (config.get("debug_mode").equals("0")) {
+                debugMode = false;
+                debugModeToggleButton.setSelected(false);
+
+            } else {
+                debugMode = true;
+                debugModeToggleButton.setSelected(true);
+            }
+
+            actionsVBox.setOnSwipeRight(event -> returnToParentLayerButtonClicked(null));
+
+            System.out.println(eachActionSize + eachActionPadding);
+            System.out.println("XXXXX : "+getWidth()+","+getHeight());
+            maxActionsPerRow = (int) (getWidth() / (eachActionSize + eachActionPadding));
+            maxNoOfRows = (int) (getHeight() / (eachActionSize + eachActionPadding));
+
+
+            socketCommThread = new Thread(socketCommTask);
+            socketCommThread.setDaemon(true);
+            socketCommThread.start();
+
+            checkServerConnection();
+        }
+        catch (Exception e)
+        {
+            showErrorAlert("Permissions","Please provide Storage permissions to StreamPi!", true);
             e.printStackTrace();
         }
 
-        eachActionSize = (int) config.get("each_action_size");
-        eachActionPadding = (int) config.get("each_action_padding");
-        actionsVBox.setSpacing(eachActionPadding);
-        actionsVBox.setPadding(new Insets(3));
 
-        serverIPField.setText(serverIP);
-        serverPortField.setText(serverPort + "");
-        unableToConnectReasonLabel.setText("");
-
-        if (config.get("animations_mode").equals("0")) {
-            animationsToggleButton.setSelected(false);
-        } else {
-            animationsToggleButton.setSelected(true);
-        }
-
-        if (config.get("debug_mode").equals("0")) {
-            debugMode = false;
-            debugModeToggleButton.setSelected(false);
-
-        } else {
-            debugMode = true;
-            debugModeToggleButton.setSelected(true);
-        }
-
-        actionsVBox.setOnSwipeRight(event -> returnToParentLayerButtonClicked(null));
-
-        System.out.println(eachActionSize + eachActionPadding);
-        maxActionsPerRow = (int) (actionsVBox.getWidth() / (eachActionSize + eachActionPadding));
-        maxNoOfRows = (int) (actionsVBox.getHeight() / (eachActionSize + eachActionPadding));
-
-
-        socketCommThread = new Thread(socketCommTask);
-        socketCommThread.setDaemon(true);
-        socketCommThread.start();
-
-        checkServerConnection();
     }
 
     @Override
@@ -135,29 +145,55 @@ public class dash extends dashboardBase {
 
 
     pane currentPane = pane.loading;
-
-    public void switchPane(pane p) {
-        if (p != currentPane) {
-            if (config.get("animations_mode").equals("0")) {
-                if (p == pane.loading) {
-                    Platform.runLater(loadingPane::toFront);
-                } else if (p == pane.settings) {
-                    if (!isConnected) {
+    public void switchPane(pane p)
+    {
+        if(p!=currentPane)
+        {
+            if (config.get("animations_mode").equals("0"))
+            {
+                if(p == pane.loading)
+                {
+                    Platform.runLater(()->{
+                        loadingPane.setOpacity(1);
+                        loadingPane.toFront();
+                    });
+                }
+                else if(p== pane.settings)
+                {
+                    if (!isConnected)
+                    {
                         closeSettingsButton.setVisible(false);
-                    } else {
+                    }
+                    else
+                    {
                         closeSettingsButton.setVisible(true);
                     }
-                    Platform.runLater(settingsPane::toFront);
-                } else if (p == pane.actions) {
-                    Platform.runLater(actionsVBox::toFront);
+                    Platform.runLater(()->{
+                        settingsPane.setOpacity(1);
+                        settingsPane.toFront();
+                    });
                 }
-            } else {
-                if (p == pane.loading) {
+                else if(p== pane.actions)
+                {
+                    Platform.runLater(()->{
+                        actionsVBox.setOpacity(1);
+                        actionsVBox.toFront();
+                    });
+                }
+            }
+            else
+            {
+                if(p== pane.loading)
+                {
                     new FadeIn(loadingPane).play();
                     Platform.runLater(loadingPane::toFront);
-                } else if (p == pane.actions) {
-                    if (currentPane == pane.settings) {
-                        SlideOutDown s = new SlideOutDown(settingsPane);
+                }
+                else if(p== pane.actions)
+                {
+                    if(currentPane == pane.settings)
+                    {
+                        System.out.println("CCA");
+                        FadeOutDown s = new FadeOutDown(settingsPane);
                         s.setSpeed(1.5);
                         s.setOnFinished(event -> {
                             actionsVBox.toFront();
@@ -165,28 +201,36 @@ public class dash extends dashboardBase {
                             settingsPane.toBack();
                         });
                         s.play();
-                    } else {
-                        new FadeIn(actionsVBox).play();
-                        Platform.runLater(actionsVBox::toFront);
                     }
-                } else if (p == pane.settings) {
+                    else
+                    {
+                        Platform.runLater(actionsVBox::toFront);
+                        new FadeIn(actionsVBox).play();
+                    }
+                }
+                else if(p== pane.settings)
+                {
                     if (!isConnected) {
                         closeSettingsButton.setVisible(false);
                     } else {
                         closeSettingsButton.setVisible(true);
                     }
-                    SlideInUp z = new SlideInUp(settingsPane);
+                    System.out.println("Asdx");
+                    Platform.runLater(()->settingsPane.setOpacity(0));
+                    FadeInUp z = new FadeInUp(settingsPane);
                     z.setSpeed(1.2);
+                    z.setDelay(Duration.millis(50));
                     z.play();
                     Platform.runLater(settingsPane::toFront);
                 }
             }
 
+            if(currentPane==pane.loading) loadingPane.setOpacity(0);
             currentPane = p;
         }
     }
 
-    enum pane {
+    enum pane{
         loading, settings, actions
     }
 
@@ -223,8 +267,6 @@ public class dash extends dashboardBase {
                         Thread.sleep(3000);
                     }
 
-                    Thread.sleep(200);
-
                     try {
                         serverPortTemp = Integer.parseInt(serverPortField.getText());
                     } catch (Exception e) {
@@ -251,7 +293,7 @@ public class dash extends dashboardBase {
                         unableToConnectReasonLabel.setText("");
                     });
 
-                    switchPane(pane.loading);
+                    //isUpdateStuff=true;
                     loadActions();
                     isConnected = true;
 
@@ -297,55 +339,58 @@ public class dash extends dashboardBase {
                     }
 
                 } catch (Exception e) {
-                    showErrorAlert("Alert", "Please make sure screen dimensions are valid.");
+                    showErrorAlert("Alert", "Please make sure screen dimensions are valid.", false);
                 }
                 return null;
             }
         }).start();
     }
 
-    public void showErrorAlert(String heading, String content) {
-        System.out.println("\n\nALERT\nHEADING : " + heading + "\nCONTENT:" + content + "\n\n");
-        /*System.out.println("XD");
+    public void showErrorAlert(String heading, String content, boolean noButton) {
+        System.out.println("\n\nALERT\nHEADING : "+heading+"\nCONTENT:"+content+"\n\n");
+        System.out.println("XD");
         JFXDialogLayout l = new JFXDialogLayout();
         l.getStyleClass().add("dialog_style");
         Label headingLabel = new Label(heading);
-        headingLabel.setTextFill(WHITE_PAINT);
+        headingLabel.setTextFill(Color.WHITE);
         headingLabel.setFont(Font.font("Roboto Regular", 25));
         l.setHeading(headingLabel);
         Label contentLabel = new Label(content);
         contentLabel.setFont(Font.font("Roboto Regular", 15));
-        contentLabel.setTextFill(WHITE_PAINT);
+        contentLabel.setTextFill(Color.WHITE);
         contentLabel.setWrapText(true);
         l.setBody(contentLabel);
-        JFXButton okButton = new JFXButton("OK");
-        okButton.setTextFill(WHITE_PAINT);
-        l.setActions(okButton);
+
         JFXDialog alertDialog = new JFXDialog(alertStackPane, l, JFXDialog.DialogTransition.CENTER);
+        alertDialog.setCache(true);
+        alertDialog.setCacheHint(CacheHint.SPEED);
         alertDialog.setOverlayClose(false);
         alertDialog.getStyleClass().add("dialog_box");
-        okButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
+
+        if(!noButton)
+        {
+            JFXButton okButton = new JFXButton("OK");
+            okButton.setTextFill(Color.WHITE);
+            l.setActions(okButton);
+            okButton.setOnMouseClicked(event -> {
                 alertDialog.close();
-                alertDialog.setOnDialogClosed(new EventHandler<JFXDialogEvent>() {
-                    @Override
-                    public void handle(JFXDialogEvent event) {
-                        alertStackPane.toBack();
-                    }
-                });
-            }
-        });
+                alertDialog.setOnDialogClosed(event1 -> alertStackPane.toBack());
+            });
+        }
+
+
         alertStackPane.toFront();
-        alertDialog.show();*/
+        alertDialog.show();
     }
 
-    public void updateConfig(String keyName, String newValue) {
+    public void updateConfig(String keyName, String newValue){
         try {
             config.put(keyName, newValue);
-            String toBeWritten = config.get("width")+separator+config.get("height")+separator+config.get("server_ip") + separator + config.get("server_port") + separator + config.get("device_nick_name") + separator + config.get("animations_mode") + separator + config.get("debug_mode") + separator + config.get("each_action_size") + separator + config.get("each_action_padding") + separator;
+            String toBeWritten = config.get("server_ip") + separator + config.get("server_port") + separator + config.get("device_nick_name") + separator + config.get("animations_mode") + separator + config.get("debug_mode") + separator + config.get("each_action_size") + separator + config.get("each_action_padding") + separator;
             io.writeToFile(toBeWritten, "config");
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
@@ -393,18 +438,19 @@ public class dash extends dashboardBase {
                                 updateConfig("each_action_size", newActionSizeString);
                                 updateConfig("each_action_padding", newActionPaddingString);
 
-                                maxActionsPerRow = (int) (actionsVBox.getWidth() / (eachActionSize + eachActionPadding));
-                                maxNoOfRows = (int) (actionsVBox.getHeight() / (eachActionSize + eachActionPadding));
+                                System.out.println("XXXXX : "+getWidth()+","+getHeight());
+                                maxActionsPerRow = (int) (getWidth() / (eachActionSize + eachActionPadding));
+                                maxNoOfRows = (int) (getHeight() / (eachActionSize + eachActionPadding));
 
-                                loadActions();
+                                drawLayer(0,-1);
                             }
                         } else if (msgHeading.equals("delete_action")) {
                             System.out.println("Deleting...");
                             io.deleteFile("actions/details/" + response[1]);
                             System.out.println("actions/icons/" + response[2]);
                             io.deleteFile("actions/icons/" + response[2]);
-                            isUpdateStuff = true;
                             loadActions();
+                            drawLayer(0,-1);
                         } else if (msgHeading.equals("actions_update")) {
                             //delete all details...
                             for (String[] eachAction : actions) {
@@ -429,16 +475,16 @@ public class dash extends dashboardBase {
                                 currentIndex++;
                             }
                             //System.out.println("updated!");
-                            isUpdateStuff = true;
                             loadActions();
+                            drawLayer(0,-1);
                         } else if (msgHeading.equals("update_icon")) {
                             String iconName = response[1];
                             String actionImageBase64 = response[2];
 
                             byte[] img = Base64.getDecoder().decode(actionImageBase64);
                             io.writeToFileRaw(img, "actions/icons/" + iconName);
-                            isUpdateStuff = true;
                             loadActions();
+                            drawLayer(0,-1);
                         } else if (msgHeading.equals("get_actions")) {
                             //System.out.println("145455");
                             String towrite = "client_actions" + separator + actions.length + separator;
@@ -463,6 +509,7 @@ public class dash extends dashboardBase {
                                     Thread.sleep(300);
                                 }
                             }
+                            drawLayer(0,-1);
                             switchPane(pane.actions);
                         }
                     }
@@ -501,9 +548,11 @@ public class dash extends dashboardBase {
                                                             lol2.setFromY(0.9);
                                                             lol2.setToX(1.0);
                                                             lol2.setToY(1.0);
+
                                                             FadeTransition lol3 = new FadeTransition(Duration.millis(450),eachAction);
                                                             lol3.setFromValue(0.7);
                                                             lol3.setToValue(1.0);
+
                                                             lol2.play();
                                                             lol3.play();*/
 
@@ -575,7 +624,6 @@ public class dash extends dashboardBase {
         }
     }
 
-    boolean isUpdateStuff = false;
     int currentLayer = 0;
 
     boolean isDisplayMismatchError = false;
@@ -650,49 +698,53 @@ public class dash extends dashboardBase {
             }
         }
 
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
+        Platform.runLater(() -> {
 
-                if (mode == 0) {
-                    FadeOutRight gay = new FadeOutRight(actionsVBox);
-                    gay.setSpeed(3.0);
-                    gay.play();
-                    gay.setOnFinished(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent event) {
-                            actionsVBox.getChildren().clear();
-                            actionsVBox.getChildren().addAll(rows);
-                            FadeInLeft fag = new FadeInLeft(actionsVBox);
-                            fag.setSpeed(2.0);
-                            fag.play();
-                        }
-                    });
-                } else if (mode == 1) {
-                    FadeOutLeft gay = new FadeOutLeft(actionsVBox);
-                    gay.setSpeed(3.0);
-                    gay.play();
-                    gay.setOnFinished(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent event) {
-                            actionsVBox.getChildren().clear();
-                            actionsVBox.getChildren().addAll(rows);
-                            FadeInRight fag = new FadeInRight(actionsVBox);
-                            fag.setSpeed(2.0);
-                            fag.play();
-                        }
-                    });
-                } else {
+            settingsPane.setVisible(false);
+            loadingPane.setVisible(false);
+
+            if (mode == 0) {
+                FadeOutRight gay = new FadeOutRight(actionsVBox);
+                gay.setSpeed(3.0);
+                gay.play();
+                gay.setOnFinished(event -> {
                     actionsVBox.getChildren().clear();
                     actionsVBox.getChildren().addAll(rows);
-                }
+                    FadeInLeft fag = new FadeInLeft(actionsVBox);
+                    fag.setSpeed(2.0);
+                    fag.play();
+                    fag.setOnFinished(event1->{
+                        settingsPane.setVisible(true);
+                        loadingPane.setVisible(true);
+                    });
+                });
+            } else if (mode == 1) {
+                FadeOutLeft gay = new FadeOutLeft(actionsVBox);
+                gay.setSpeed(3.0);
+                gay.play();
+                gay.setOnFinished(event -> {
+                    actionsVBox.getChildren().clear();
+                    actionsVBox.getChildren().addAll(rows);
+                    FadeInRight fag = new FadeInRight(actionsVBox);
+                    fag.setSpeed(2.0);
+                    fag.play();
+                    fag.setOnFinished(event1->{
+                        settingsPane.setVisible(true);
+                        loadingPane.setVisible(true);
+                    });
+                });
+            } else {
+                actionsVBox.getChildren().clear();
+                actionsVBox.getChildren().addAll(rows);
 
-
-                if (layer != -1)
-                    currentLayer = layer;
-
-
+                settingsPane.setVisible(true);
+                loadingPane.setVisible(true);
             }
+
+
+            if (layer != -1)
+                currentLayer = layer;
+
         });
     }
 
@@ -702,9 +754,11 @@ public class dash extends dashboardBase {
         lol2.setFromY(1.0);
         lol2.setToX(0.9);
         lol2.setToY(0.9);
+
         FadeTransition lol3 = new FadeTransition(Duration.millis(550), n);
         lol3.setFromValue(1.0);
         lol3.setToValue(0.7);
+
         lol2.play();
         lol3.play();*/
 
@@ -759,25 +813,10 @@ public class dash extends dashboardBase {
 
         maxLayers = lowLayer;
 
-        if (isUpdateStuff)
-            drawLayer(0, -1);
-        else {
-            drawLayer(0, 1);
-            if (isDisplayMismatchError) {
-                showErrorAlert("Warning!", "All actions could not be loaded properly because of less available screen size. Try changing the action size or get a bigger screen, or remove the unloaded actions.");
-            }
-        }
-
-        //Thread.sleep(500);
-        //System.out.println("asdesaxxx");
-
-        if (actions.length == 0) {
+        if(actions.length == 0)
+        {
+            drawLayer(0,-1);
             switchPane(pane.actions);
-        }
-
-        if (isUpdateStuff) {
-            isUpdateStuff = false;
-            //For future compatibility reasons...
         }
     }
 
@@ -816,7 +855,8 @@ public class dash extends dashboardBase {
     }
 
     @Override
-    protected void openSettings() {
+    protected void openSettings()
+    {
         switchPane(pane.settings);
     }
 
@@ -826,7 +866,6 @@ public class dash extends dashboardBase {
             @Override
             protected Void call() throws Exception {
                 if (isConnected) {
-                    Thread.sleep(200);
                     Platform.runLater(() -> {
                         closeSettingsButton.setDisable(true);
                         switchPane(pane.actions);
@@ -840,4 +879,5 @@ public class dash extends dashboardBase {
     }
 
     boolean isShutdown = false;
+
 }
