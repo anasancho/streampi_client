@@ -28,7 +28,7 @@ public class io {
 
 
             if(!new File(location+"config").createNewFile()) throw new Exception("Unable to Create Config");
-            writeToFile("192.168.0.102::22::StreamPi::1::1::50::10::","config");
+            writeToFile("320::240::192.168.0.102::22::StreamPi::1::1::50::10::","config");
         }
     }
 

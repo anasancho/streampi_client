@@ -59,17 +59,27 @@ public class dash extends dashboardBase {
     {
         config = new HashMap<>();
         String[] configArray = io.readFileArranged("config","::");
-        config.put("width",(int) getWidth());
-        config.put("height",(int) getHeight());
-        config.put("server_ip",configArray[0]);
-        serverIP = configArray[0];
-        config.put("server_port",Integer.parseInt(configArray[1]));
+        if(Main.isMobile)
+        {
+            config.put("width",(int) getWidth());
+            config.put("height",(int) getHeight());
+        }
+        else
+        {
+            config.put("width", Integer.parseInt(configArray[0]));
+            config.put("height", Integer.parseInt(configArray[1]));
+        }
+
+
+        config.put("server_ip",configArray[2]);
+        serverIP = configArray[2];
+        config.put("server_port",Integer.parseInt(configArray[3]));
         serverPort = (int) config.get("server_port");
-        config.put("device_nick_name",configArray[2]);
-        config.put("animations_mode",configArray[3]);
-        config.put("debug_mode",configArray[4]);
-        config.put("each_action_size",Integer.parseInt(configArray[5]));
-        config.put("each_action_padding",Integer.parseInt(configArray[6]));
+        config.put("device_nick_name",configArray[4]);
+        config.put("animations_mode",configArray[5]);
+        config.put("debug_mode",configArray[6]);
+        config.put("each_action_size",Integer.parseInt(configArray[7]));
+        config.put("each_action_padding",Integer.parseInt(configArray[8]));
     }
 
 
@@ -105,9 +115,9 @@ public class dash extends dashboardBase {
             actionsVBox.setOnSwipeRight(event -> returnToParentLayerButtonClicked(null));
 
             System.out.println(eachActionSize + eachActionPadding);
-            System.out.println("XXXXX : "+getWidth()+","+getHeight());
-            maxActionsPerRow = (int) (getWidth() / (eachActionSize + eachActionPadding));
-            maxNoOfRows = (int) (getHeight() / (eachActionSize + eachActionPadding));
+            System.out.println("XXXXX : "+config.get("width")+","+config.get("height"));
+            maxActionsPerRow = (((int)config.get("width")) / (eachActionSize + eachActionPadding));
+            maxNoOfRows = (((int)config.get("height")) / (eachActionSize + eachActionPadding));
 
 
             socketCommThread = new Thread(socketCommTask);
