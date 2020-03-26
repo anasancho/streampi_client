@@ -15,7 +15,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <client.plugin.version>0.1.17</client.plugin.version>
-        <mainClassName>StreamPiClient.Main</mainClassName>
+        <mainClassName>StreamPiClient.ActualMain</mainClassName>
     </properties>
 
 
@@ -29,9 +29,8 @@
 
         <dependency>
             <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics </artifactId>
+            <artifactId>javafx-base</artifactId>
             <version>11</version>
-            <classifier>linux</classifier>
         </dependency>
 
         <dependency>
