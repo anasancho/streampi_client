@@ -396,7 +396,7 @@ public class dash extends dashboardBase {
     public void updateConfig(String keyName, String newValue){
         try {
             config.put(keyName, newValue);
-            String toBeWritten = config.get("server_ip") + separator + config.get("server_port") + separator + config.get("device_nick_name") + separator + config.get("animations_mode") + separator + config.get("debug_mode") + separator + config.get("each_action_size") + separator + config.get("each_action_padding") + separator;
+            String toBeWritten = config.get("width")+ separator + config.get("height") +separator +  config.get("server_ip") + separator + config.get("server_port") + separator + config.get("device_nick_name") + separator + config.get("animations_mode") + separator + config.get("debug_mode") + separator + config.get("each_action_size") + separator + config.get("each_action_padding") + separator;
             io.writeToFile(toBeWritten, "config");
         }
         catch (Exception e)
@@ -448,9 +448,9 @@ public class dash extends dashboardBase {
                                 updateConfig("each_action_size", newActionSizeString);
                                 updateConfig("each_action_padding", newActionPaddingString);
 
-                                System.out.println("XXXXX : "+getWidth()+","+getHeight());
-                                maxActionsPerRow = (int) (getWidth() / (eachActionSize + eachActionPadding));
-                                maxNoOfRows = (int) (getHeight() / (eachActionSize + eachActionPadding));
+                                System.out.println("XXXXX : "+config.get("width")+","+config.get("height"));
+                                maxActionsPerRow = (((int)config.get("width")) / (eachActionSize + eachActionPadding));
+                                maxNoOfRows = (((int)config.get("height")) / (eachActionSize + eachActionPadding));
 
                                 drawLayer(0,-1);
                             }
