@@ -15,7 +15,11 @@ public class Main extends Application {
         d.initialize();
     }
 
-    static final boolean isMobile = false;
+    enum platform{
+        ios, android, aarch64Linux, windows
+    }
+
+    static platform buildPlatform = platform.windows;
 
     public static void main(String[] args) {
         System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true" );

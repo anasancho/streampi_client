@@ -8,7 +8,7 @@ public class io {
     String location;
     public io() throws Exception
     {
-        if(Main.isMobile)
+        if(Main.buildPlatform == Main.platform.android || Main.buildPlatform == Main.platform.ios)
         {
             location = "/storage/emulated/0/StreamPiClient/";
         }

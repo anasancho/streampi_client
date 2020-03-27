@@ -8,8 +8,10 @@
         <outputRelativeToContentRoot value="true" />
         <module name="StreamPiClient" />
         <module name="streampi_client_maven" />
-        <module name="streampi_client" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="streampi_client" target="11" />
+    </bytecodeTargetLevel>
   </component>
 </project>

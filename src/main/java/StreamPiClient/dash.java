@@ -59,7 +59,7 @@ public class dash extends dashboardBase {
     {
         config = new HashMap<>();
         String[] configArray = io.readFileArranged("config","::");
-        if(Main.isMobile)
+        if(Main.buildPlatform == Main.platform.android || Main.buildPlatform == Main.platform.ios)
         {
             config.put("width",(int) getWidth());
             config.put("height",(int) getHeight());
