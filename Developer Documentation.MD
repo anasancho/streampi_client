@@ -64,30 +64,30 @@ Sent when the Client wants to quit and end connection to the Server. The server 
 
 ###From Server to Client
 
-####client_actions_icons_get
+#### client_actions_icons_get
 Structure : `client_actions_icons_get::`
 
 Asks client to send all action icons
 
-####get_actions
+#### get_actions
 
 Structure : `get_actions::`
 
 Asks Client to send all action names and Action Objects to the Client
 
-####update_icon
+#### update_icon
 
 Structure : `update_icon::<Icon Name>::<Icon in Base64>::`
 
 Sends new icon to client to update
 
-####actions_update
+#### actions_update
 
 Structure : `actions_update::<n No. Of Actions>::<Action Objects>::....n::`
 
 Sends all new update actions to the client
 
-####delete_action
+#### delete_action
 
 Structure : `delete_action::<Action Unique ID>::<Action Icon Name>::`
 
