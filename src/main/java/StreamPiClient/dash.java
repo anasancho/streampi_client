@@ -1,6 +1,7 @@
 package StreamPiClient;
 
 import animatefx.animation.*;
+import com.jfoenix.controls.JFXAlert;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialogLayout;
@@ -51,7 +52,7 @@ public class dash extends dashboardBase {
     int eachActionSize;
     int eachActionPadding;
 
-    public HashMap<String, Object> config;
+    public HashMap<String, String> config;
 
     public io io;
 
@@ -61,41 +62,47 @@ public class dash extends dashboardBase {
         String[] configArray = io.readFileArranged("config","::");
         if(Main.buildPlatform == Main.platform.android || Main.buildPlatform == Main.platform.ios)
         {
-            config.put("width",(int) getWidth());
-            config.put("height",(int) getHeight());
+            config.put("width",(int) getWidth()+"");
+            config.put("height",(int) getHeight()+"");
         }
         else
         {
-            config.put("width", Integer.parseInt(configArray[0]));
-            config.put("height", Integer.parseInt(configArray[1]));
+            config.put("width", configArray[0]);
+            config.put("height", configArray[1]);
         }
 
 
         config.put("server_ip",configArray[2]);
         serverIP = configArray[2];
-        config.put("server_port",Integer.parseInt(configArray[3]));
-        serverPort = (int) config.get("server_port");
+        config.put("server_port",configArray[3]);
+        serverPort =Integer.parseInt(config.get("server_port"));
         config.put("device_nick_name",configArray[4]);
         config.put("animations_mode",configArray[5]);
         config.put("debug_mode",configArray[6]);
-        config.put("each_action_size",Integer.parseInt(configArray[7]));
-        config.put("each_action_padding",Integer.parseInt(configArray[8]));
+        config.put("each_action_size",configArray[7]);
+        config.put("each_action_padding",configArray[8]);
     }
 
 
-    public void initialize() {
+    public dash() {
         try
         {
             io = new io();
             readConfig();
-            eachActionSize = (int) config.get("each_action_size");
-            eachActionPadding = (int) config.get("each_action_padding");
+            eachActionSize = Integer.parseInt(config.get("each_action_size"));
+            eachActionPadding =Integer.parseInt(config.get("each_action_padding"));
             actionsVBox.setSpacing(eachActionPadding);
             actionsVBox.setPadding(new Insets(3));
 
             serverIPField.setText(serverIP);
             serverPortField.setText(serverPort+"");
             unableToConnectReasonLabel.setText("");
+
+            if(Main.buildPlatform != Main.platform.android && Main.buildPlatform != Main.platform.ios)
+            {
+                displayHeightTextField.setText(config.get("height"));
+                displayWidthTextField.setText(config.get("width"));
+            }
 
             if (config.get("animations_mode").equals("0")) {
                 animationsToggleButton.setSelected(false);
@@ -116,9 +123,13 @@ public class dash extends dashboardBase {
 
             System.out.println(eachActionSize + eachActionPadding);
             System.out.println("XXXXX : "+config.get("width")+","+config.get("height"));
-            maxActionsPerRow = (((int)config.get("width")) / (eachActionSize + eachActionPadding));
-            maxNoOfRows = (((int)config.get("height")) / (eachActionSize + eachActionPadding));
+            maxActionsPerRow = (Integer.parseInt(config.get("width")) / (eachActionSize + eachActionPadding));
+            maxNoOfRows = (Integer.parseInt(config.get("height")) / (eachActionSize + eachActionPadding));
 
+            if(Main.buildPlatform != Main.platform.android && Main.buildPlatform != Main.platform.ios)
+            {
+                setPrefSize(Integer.parseInt(config.get("width")), Integer.parseInt(config.get("height")));
+            }
 
             socketCommThread = new Thread(socketCommTask);
             socketCommThread.setDaemon(true);
@@ -209,6 +220,7 @@ public class dash extends dashboardBase {
                             actionsVBox.toFront();
                             Platform.runLater(actionsVBox::toFront);
                             settingsPane.toBack();
+                            if(currentPane==pane.loading) loadingPane.setOpacity(0);
                         });
                         s.play();
                     }
@@ -229,13 +241,14 @@ public class dash extends dashboardBase {
                     Platform.runLater(()->settingsPane.setOpacity(0));
                     FadeInUp z = new FadeInUp(settingsPane);
                     z.setSpeed(1.2);
-                    z.setDelay(Duration.millis(50));
                     z.play();
+                    z.setOnFinished(event -> {
+                        if(currentPane==pane.loading) loadingPane.setOpacity(0);
+                    });
                     Platform.runLater(settingsPane::toFront);
                 }
             }
 
-            if(currentPane==pane.loading) loadingPane.setOpacity(0);
             currentPane = p;
         }
     }
@@ -344,53 +357,90 @@ public class dash extends dashboardBase {
                     String portVal = serverPortField.getText();
                     String ipVal = serverIPField.getText();
 
-                    if (!config.get("server_ip").equals(ipVal) || !config.get("server_port").equals(portVal) || !isConnected) {
-                        checkServerConnection();
+                    if(Main.buildPlatform != Main.platform.android && Main.buildPlatform != Main.platform.ios)
+                    {
+                        if(!config.get("width").equals(displayWidthTextField.getText()) && !config.get("height").equals(displayHeightTextField.getText()))
+                        {
+                            updateConfig("width",displayWidthTextField.getText());
+                            updateConfig("height",displayHeightTextField.getText());
+                            Platform.runLater(()->{
+                                JFXDialog ad = showErrorAlert("Restart","Restart to see display changes",false);
+                                ad.setOnDialogClosed(event->{
+                                    if (!config.get("server_ip").equals(ipVal) || !config.get("server_port").equals(portVal) || !isConnected) {
+                                        checkServerConnection();
+                                    }
+                                });
+                            });
+                        }
+                        else
+                        {
+                            if (!config.get("server_ip").equals(ipVal) || !config.get("server_port").equals(portVal) || !isConnected) {
+                                checkServerConnection();
+                            }
+                        }
                     }
 
+
+
                 } catch (Exception e) {
-                    showErrorAlert("Alert", "Please make sure screen dimensions are valid.", false);
+                    e.printStackTrace();
+                    Platform.runLater(()->showErrorAlert("Alert", "Please make sure screen dimensions are valid and display sizes are all in number"));
                 }
                 return null;
             }
         }).start();
     }
 
-    public void showErrorAlert(String heading, String content, boolean noButton) {
-        System.out.println("\n\nALERT\nHEADING : "+heading+"\nCONTENT:"+content+"\n\n");
-        System.out.println("XD");
-        JFXDialogLayout l = new JFXDialogLayout();
-        l.getStyleClass().add("dialog_style");
-        Label headingLabel = new Label(heading);
-        headingLabel.setTextFill(Color.WHITE);
-        headingLabel.setFont(Font.font("Roboto Regular", 25));
-        l.setHeading(headingLabel);
-        Label contentLabel = new Label(content);
-        contentLabel.setFont(Font.font("Roboto Regular", 15));
-        contentLabel.setTextFill(Color.WHITE);
-        contentLabel.setWrapText(true);
-        l.setBody(contentLabel);
+    JFXDialog showErrorAlert(String heading, String content)
+    {
+        return showErrorAlert(heading, content, false);
+    }
 
-        JFXDialog alertDialog = new JFXDialog(alertStackPane, l, JFXDialog.DialogTransition.CENTER);
-        alertDialog.setCache(true);
-        alertDialog.setCacheHint(CacheHint.SPEED);
-        alertDialog.setOverlayClose(false);
-        alertDialog.getStyleClass().add("dialog_box");
-
-        if(!noButton)
+    public JFXDialog showErrorAlert(String heading, String content, boolean noButton)
+    {
+        try
         {
-            JFXButton okButton = new JFXButton("OK");
-            okButton.setTextFill(Color.WHITE);
-            l.setActions(okButton);
-            okButton.setOnMouseClicked(event -> {
-                alertDialog.close();
-                alertDialog.setOnDialogClosed(event1 -> alertStackPane.toBack());
-            });
+            System.out.println("\n\nALERT\nHEADING : "+heading+"\nCONTENT:"+content+"\n\n");
+            System.out.println("XD");
+            JFXDialogLayout l = new JFXDialogLayout();
+            l.getStyleClass().add("dialog_style");
+            Label headingLabel = new Label(heading);
+            headingLabel.setTextFill(Color.WHITE);
+            headingLabel.setFont(Font.font("Roboto Regular", 25));
+            l.setHeading(headingLabel);
+            Label contentLabel = new Label(content);
+            contentLabel.setFont(Font.font("Roboto Regular", 15));
+            contentLabel.setTextFill(Color.WHITE);
+            contentLabel.setWrapText(true);
+            l.setBody(contentLabel);
+
+            JFXDialog alertDialog = new JFXDialog(alertStackPane, l, JFXDialog.DialogTransition.CENTER);
+            alertDialog.setCache(true);
+            alertDialog.setCacheHint(CacheHint.SPEED);
+            alertDialog.setOverlayClose(false);
+            alertDialog.getStyleClass().add("dialog_box");
+
+            if(!noButton)
+            {
+                JFXButton okButton = new JFXButton("OK");
+                okButton.setTextFill(Color.WHITE);
+                l.setActions(okButton);
+                okButton.setOnMouseClicked(event -> {
+                    alertDialog.close();
+                    alertDialog.setOnDialogClosed(event1 -> alertStackPane.toBack());
+                });
+            }
+
+
+            alertStackPane.toFront();
+            alertDialog.show();
+            return alertDialog;
         }
-
-
-        alertStackPane.toFront();
-        alertDialog.show();
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public void updateConfig(String keyName, String newValue){
@@ -449,8 +499,8 @@ public class dash extends dashboardBase {
                                 updateConfig("each_action_padding", newActionPaddingString);
 
                                 System.out.println("XXXXX : "+config.get("width")+","+config.get("height"));
-                                maxActionsPerRow = (((int)config.get("width")) / (eachActionSize + eachActionPadding));
-                                maxNoOfRows = (((int)config.get("height")) / (eachActionSize + eachActionPadding));
+                                maxActionsPerRow = (Integer.parseInt(config.get("width")) / (eachActionSize + eachActionPadding));
+                                maxNoOfRows = (Integer.parseInt(config.get("height")) / (eachActionSize + eachActionPadding));
 
                                 drawLayer(0,-1);
                             }

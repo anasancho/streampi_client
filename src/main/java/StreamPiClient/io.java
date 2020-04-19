@@ -8,9 +8,9 @@ public class io {
     String location;
     public io() throws Exception
     {
-        if(Main.buildPlatform == Main.platform.android || Main.buildPlatform == Main.platform.ios)
+        if(Main.buildPlatform == Main.platform.android)
         {
-            location = "/storage/emulated/0/StreamPiClient/";
+            location = "/storage/emulated/0/Android/com.github.dubbadhar.StreamPiClient/";
         }
         else
         {
@@ -27,8 +27,11 @@ public class io {
             if(!iconsFolder.mkdirs()) throw new Exception("Unable to create Icons Folder");
 
 
-            if(!new File(location+"config").createNewFile()) throw new Exception("Unable to Create Config");
-            writeToFile("320::240::192.168.0.102::22::StreamPi::1::1::50::10::","config");
+            if(!new File(location+"config").exists())
+            {
+                if(!new File(location+"config").createNewFile()) throw new Exception("Unable to Create Config");
+                writeToFile("800::480::192.168.0.108::23::StreamPi Client::1::1::105::10::","config");
+            }
         }
     }
 

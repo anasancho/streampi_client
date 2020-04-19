@@ -8,18 +8,16 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        dash d = new dash();
-        Scene s = new Scene(d);
+        Scene s = new Scene(new dash());
         primaryStage.setScene(s);
         primaryStage.show();
-        d.initialize();
     }
 
     enum platform{
-        ios, android, aarch64Linux, windows
+        ios, android, raspberrypi, windows
     }
 
-    static platform buildPlatform = platform.windows;
+    static platform buildPlatform = platform.raspberrypi;
 
     public static void main(String[] args) {
         System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true" );

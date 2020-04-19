@@ -14,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 public abstract class dashboardBase extends StackPane {
 
@@ -43,6 +44,8 @@ public abstract class dashboardBase extends StackPane {
     protected Label unableToConnectReasonLabel;
     protected HBox settingsButtonsBar;
     protected JFXButton applySettingsAndRestartButton;
+    protected TextField displayWidthTextField;
+    protected TextField displayHeightTextField;
 
     public dashboardBase() {
         alertStackPane = new StackPane();
@@ -74,6 +77,8 @@ public abstract class dashboardBase extends StackPane {
         unableToConnectReasonLabel = new Label();
         settingsButtonsBar = new HBox();
         applySettingsAndRestartButton = new JFXButton();
+
+        Font.loadFont(getClass().getResource("Roboto.ttf").toExternalForm().replace("%20"," "), 13);
 
         getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         getStyleClass().add("pane");
@@ -162,7 +167,7 @@ public abstract class dashboardBase extends StackPane {
         applySettingsAndRestartButton.setTextFill(Color.GREEN);
         applySettingsAndRestartButton.setText("Apply Settings And Restart");
 
-        setOnMouseDragged(event->openSettings());
+        setOnSwipeUp(event->openSettings());
 
         getChildren().add(alertStackPane);
         getChildren().add(actionsVBox);
@@ -181,6 +186,22 @@ public abstract class dashboardBase extends StackPane {
         hBox0.setAlignment(Pos.CENTER_LEFT);
         settingsPane.getChildren().add(hBox0);
 
+        HBox hBox1 = new HBox();
+        hBox1.setSpacing(10);
+        Label l1 = new Label("Display Width");
+        displayWidthTextField = new TextField();
+        Region rx2 = new Region();
+        Label l2 = new Label("Display Height");
+        displayHeightTextField = new TextField();
+        HBox.setHgrow(rx2, Priority.ALWAYS);
+        hBox1.getChildren().addAll(l1,displayWidthTextField, rx2, l2,displayHeightTextField);
+
+        if(Main.buildPlatform != Main.platform.android && Main.buildPlatform != Main.platform.ios)
+        {
+            settingsPane.getChildren().add(hBox1);
+        }
+
+
 
         Region rw = new Region();
         HBox.setHgrow(rw, Priority.ALWAYS);
@@ -188,7 +209,7 @@ public abstract class dashboardBase extends StackPane {
         hBox2.setAlignment(Pos.CENTER_LEFT);
         hBox2.getChildren().addAll(label5, animationsToggleButton, rw, label6, debugModeToggleButton);
 
-        settingsPane.getChildren().add(hBox2);
+        settingsPane.getChildren().addAll(hBox2);
         settingsPane.getChildren().add(currentStatusLabel);
         settingsPane.getChildren().add(unableToConnectReasonLabel);
         settingsButtonsBar.getChildren().add(applySettingsAndRestartButton);

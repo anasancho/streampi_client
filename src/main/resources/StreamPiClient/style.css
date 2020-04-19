@@ -6,6 +6,10 @@
    -fx-background-color:transparent;
 }
 
+Label {
+    -fx-font-family:"Roboto";
+}
+
 .drop_shadow {
     -fx-effect: dropshadow(three-pass-box, red, 15, 0, 0, 0)
 }
@@ -30,7 +34,7 @@ TextField {
     -fx-background-color:transparent;
     -fx-background:none;
     -fx-text-fill:white;
-
+    -fx-font-family:"Roboto";
     -fx-border-color:green;
     -fx-border-width: 0 0 1 0;
 }
@@ -44,9 +48,10 @@ Label {
 }
 
 Button {
-    -fx-background:none;
-    -fx-background-color:transparent;
+    /*-fx-background:none;
+    -fx-background-color:transparent;*/
     -fx-text-fill:white;
+    -fx-font-family:"Roboto";
 }
 
 .h3{

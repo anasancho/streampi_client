@@ -15,6 +15,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <client.plugin.version>0.1.18</client.plugin.version>
+        <javafxVersion>11</javafxVersion>
         <mainClassName>StreamPiClient.ActualMain</mainClassName>
     </properties>
 
@@ -24,13 +25,13 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>14</version>
+            <version>${javafxVersion}</version>
         </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
-            <version>14</version>
+            <version>${javafxVersion}</version>
         </dependency>
 
         <dependency>
@@ -88,6 +89,16 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.openjfx:javafx-controls:jar:11</exclude>
+                                    <exclude>org.openjfx:javafx-controls:jar:*:11</exclude>
+                                    <exclude>org.openjfx:javafx-graphics:jar:11</exclude>
+                                    <exclude>org.openjfx:javafx-graphics:jar:*:11</exclude>
+                                    <exclude>org.openjfx:javafx-base:jar:11</exclude>
+                                    <exclude>org.openjfx:javafx-base:jar:*:11</exclude>
+                                </excludes>
+                            </artifactSet>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <transformers>
                                 <transformer implementation=
