@@ -6,7 +6,7 @@
 
     <groupId>com.github.dubbadhar</groupId>
     <artifactId>StreamPiClient</artifactId>
-    <version>0.6</version>
+    <version>0.0.6</version>
 
     <name>StreamPiClient</name>
 
