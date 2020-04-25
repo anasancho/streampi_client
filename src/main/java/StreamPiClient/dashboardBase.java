@@ -1,15 +1,7 @@
 package StreamPiClient;
-
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXProgressBar;
-import com.jfoenix.controls.JFXSpinner;
-import com.jfoenix.controls.JFXToggleButton;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -23,12 +15,13 @@ public abstract class dashboardBase extends StackPane {
     protected VBox goodbyePane;
     protected Label label;
     protected VBox loadingPane;
-    protected JFXSpinner mainSpinner;
+    protected ProgressIndicator mainSpinner;
+    //protected ImageView mainSpinner;
     protected VBox settingsPane;
     protected HBox hBox;
     protected Label label0;
     protected Region region;
-    protected JFXButton closeSettingsButton;
+    protected Button closeSettingsButton;
     protected ImageView imageView0;
     protected HBox hBox0;
     protected Label label1;
@@ -37,13 +30,13 @@ public abstract class dashboardBase extends StackPane {
     protected TextField serverPortField;
     protected HBox hBox2;
     protected Label label5;
-    protected JFXToggleButton animationsToggleButton;
+    protected ToggleButton animationsToggleButton;
     protected Label label6;
-    protected JFXToggleButton debugModeToggleButton;
+    protected ToggleButton debugModeToggleButton;
     protected Label currentStatusLabel;
     protected Label unableToConnectReasonLabel;
     protected HBox settingsButtonsBar;
-    protected JFXButton applySettingsAndRestartButton;
+    protected Button applySettingsAndRestartButton;
     protected TextField displayWidthTextField;
     protected TextField displayHeightTextField;
 
@@ -54,14 +47,14 @@ public abstract class dashboardBase extends StackPane {
         label = new Label();
         loadingPane = new VBox();
         loadingPane.setAlignment(Pos.CENTER);
-        mainSpinner = new JFXSpinner();
+        mainSpinner = new ProgressIndicator();
         mainSpinner.setProgress(-1);
         mainSpinner.setPrefSize(50,50);
         settingsPane = new VBox();
         hBox = new HBox();
         label0 = new Label();
         region = new Region();
-        closeSettingsButton = new JFXButton();
+        closeSettingsButton = new Button();
         imageView0 = new ImageView();
         hBox0 = new HBox();
         label1 = new Label();
@@ -70,13 +63,13 @@ public abstract class dashboardBase extends StackPane {
         serverPortField = new TextField();
         hBox2 = new HBox();
         label5 = new Label();
-        animationsToggleButton = new JFXToggleButton();
+        animationsToggleButton = new ToggleButton();
         label6 = new Label();
-        debugModeToggleButton = new JFXToggleButton();
+        debugModeToggleButton = new ToggleButton();
         currentStatusLabel = new Label();
         unableToConnectReasonLabel = new Label();
         settingsButtonsBar = new HBox();
-        applySettingsAndRestartButton = new JFXButton();
+        applySettingsAndRestartButton = new Button();
 
         Font.loadFont(getClass().getResource("Roboto.ttf").toExternalForm().replace("%20"," "), 13);
 
@@ -222,7 +215,7 @@ public abstract class dashboardBase extends StackPane {
         actionsVBox.setOpacity(0);
     }
 
-    protected abstract void returnToParentLayerButtonClicked(javafx.event.ActionEvent actionEvent);
+    protected abstract void returnToParentLayerButtonClicked();
 
     protected abstract void openSettings();
 

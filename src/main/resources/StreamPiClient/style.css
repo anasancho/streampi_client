@@ -48,9 +48,9 @@ Label {
 }
 
 Button {
-    /*-fx-background:none;
-    -fx-background-color:transparent;*/
-    -fx-text-fill:white;
+    -fx-background:none;
+    -fx-background-color:transparent;
+
     -fx-font-family:"Roboto";
 }
 

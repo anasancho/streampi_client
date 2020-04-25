@@ -10,7 +10,7 @@ public class io {
     {
         if(Main.buildPlatform == Main.platform.android)
         {
-            location = "/storage/emulated/0/Android/com.github.dubbadhar.StreamPiClient/";
+            location = "/storage/emulated/0/Android/in.dubbadhar.StreamPiClient/";
         }
         else
         {

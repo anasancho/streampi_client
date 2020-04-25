@@ -1,10 +1,6 @@
 package StreamPiClient;
 
 import animatefx.animation.*;
-import com.jfoenix.controls.JFXAlert;
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDialog;
-import com.jfoenix.controls.JFXDialogLayout;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -17,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TouchEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -119,7 +116,7 @@ public class dash extends dashboardBase {
                 debugModeToggleButton.setSelected(true);
             }
 
-            actionsVBox.setOnSwipeRight(event -> returnToParentLayerButtonClicked(null));
+            actionsVBox.setOnSwipeRight(event -> returnToParentLayerButtonClicked());
 
             System.out.println(eachActionSize + eachActionPadding);
             System.out.println("XXXXX : "+config.get("width")+","+config.get("height"));
@@ -364,12 +361,13 @@ public class dash extends dashboardBase {
                             updateConfig("width",displayWidthTextField.getText());
                             updateConfig("height",displayHeightTextField.getText());
                             Platform.runLater(()->{
-                                JFXDialog ad = showErrorAlert("Restart","Restart to see display changes",false);
+                                showErrorAlert("Restart","Restart to see display changes",false);
+                                /*JFXDialog ad = showErrorAlert("Restart","Restart to see display changes",false);
                                 ad.setOnDialogClosed(event->{
                                     if (!config.get("server_ip").equals(ipVal) || !config.get("server_port").equals(portVal) || !isConnected) {
                                         checkServerConnection();
                                     }
-                                });
+                                });*/
                             });
                         }
                         else
@@ -391,18 +389,18 @@ public class dash extends dashboardBase {
         }).start();
     }
 
-    JFXDialog showErrorAlert(String heading, String content)
+    void showErrorAlert(String heading, String content)
     {
-        return showErrorAlert(heading, content, false);
+        showErrorAlert(heading, content, false);
     }
 
-    public JFXDialog showErrorAlert(String heading, String content, boolean noButton)
+    public void showErrorAlert(String heading, String content, boolean noButton)
     {
         try
         {
             System.out.println("\n\nALERT\nHEADING : "+heading+"\nCONTENT:"+content+"\n\n");
             System.out.println("XD");
-            JFXDialogLayout l = new JFXDialogLayout();
+            /*JFXDialogLayout l = new JFXDialogLayout();
             l.getStyleClass().add("dialog_style");
             Label headingLabel = new Label(heading);
             headingLabel.setTextFill(Color.WHITE);
@@ -434,12 +432,12 @@ public class dash extends dashboardBase {
 
             alertStackPane.toFront();
             alertDialog.show();
-            return alertDialog;
+            return alertDialog;*/
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            return null;
+           // return null;
         }
     }
 
@@ -455,7 +453,7 @@ public class dash extends dashboardBase {
         }
     }
 
-    final String CLIENT_VERSION = "0.0.5";
+    final String CLIENT_VERSION = "0.0.7";
     Task socketCommTask = new Task<Void>() {
         @Override
         protected Void call() {
@@ -468,7 +466,6 @@ public class dash extends dashboardBase {
                         String[] response = responseFromServerRaw.split(separator);
                         String msgHeading = response[0];
                         if (msgHeading.equals("client_details")) {
-                            Thread.sleep(1000);
                             writeToOS("client_details" + separator + thisDeviceIP + separator + config.get("device_nick_name") + separator + config.get("width") + separator + config.get("height") + separator + maxActionsPerRow + separator + maxNoOfRows + separator + eachActionSize + separator + eachActionPadding + separator + CLIENT_VERSION + separator);
                             //client_details::<deviceIP>::<nick_name>::<device_width>::<device_height>::<max_actions_per_row>::<max_no_of_rows>::
                             // <maxcols>
@@ -564,9 +561,8 @@ public class dash extends dashboardBase {
                                     iconsSent.add(eachAction[4]);
                                     byte[] imageB = io.returnBytesFromFile("actions/icons/" + eachAction[4]);
                                     String base64Image = Base64.getEncoder().encodeToString(imageB);
-                                    System.out.println(eachAction[4] + "GAYFAG");
+                                    System.out.println(eachAction[4]);
                                     writeToOS("action_icon::" + eachAction[4] + "::" + base64Image + "::");
-                                    Thread.sleep(300);
                                 }
                             }
                             drawLayer(0,-1);
@@ -655,7 +651,7 @@ public class dash extends dashboardBase {
         byte[] by = txt.getBytes(StandardCharsets.UTF_8);
         os.writeUTF("buff_length::" + by.length + "::");
         os.flush();
-        Thread.sleep(500);
+        Thread.sleep(50);
         os.write(by);
         os.flush();
         System.out.println("SENT @ " + by.length);
@@ -741,9 +737,9 @@ public class dash extends dashboardBase {
                         allocatedActionMouseEventHandler((Node) event.getSource());
                     }
                 });*/
-            actionPane.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            actionPane.setOnTouchMoved(new EventHandler<TouchEvent>() {
                 @Override
-                public void handle(MouseEvent event) {
+                public void handle(TouchEvent event) {
                     allocatedActionMouseEventHandler((Node) event.getSource());
                 }
             });
@@ -832,7 +828,7 @@ public class dash extends dashboardBase {
     }
 
     @Override
-    protected void returnToParentLayerButtonClicked(ActionEvent event) {
+    protected void returnToParentLayerButtonClicked() {
         for (String[] eachAction : actions) {
             if (eachAction[2].equals("folder") && eachAction[3].equals(currentLayer + "")) {
                 drawLayer(Integer.parseInt(eachAction[7]), 0);

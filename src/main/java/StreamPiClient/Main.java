@@ -17,7 +17,7 @@ public class Main extends Application {
         ios, android, raspberrypi, windows
     }
 
-    static platform buildPlatform = platform.raspberrypi;
+    static platform buildPlatform = platform.windows;
 
     public static void main(String[] args) {
         System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "true" );
